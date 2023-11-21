@@ -41,12 +41,12 @@ class Player:
     #returns true if still has ships alive
     def is_alive(self):
         for ship in self.ship_health:
-            if ship > 0:
+            if self.ship_health[ship] > 0:
                 return True
         return False
 
     #sends a string to client
-    def send_message(message):
+    def send_message(self,message):
         sock.send(message.encode(FORMAT))
 
 
@@ -59,10 +59,16 @@ def unflatten_board(flattened_board):
         i += 10
     return board
 
-
+def flatten_board(board):
+    flattened = ""
+    for x in range(10):
+        for y in range(10):
+            flattened = flattened + board[y][x]
+    return flattened
 
 #called after new connection, returns player object with ships configured
 def handle_initial_connection(player: Player):
+    player.send_message("bship");
     #wait to receive ship placement from client
     ships = player.sock.recv(256).decode(FORMAT)
     #set players status to ready and initalize those ships
@@ -77,6 +83,7 @@ if __name__ == "__main__":
 
     print("[STARTING] server is starting... (%s)" % SERVER)
     server.listen()
+    print("Waiting for clients to connect...")
 
     #wait for player 1 to join
     sock, addr = server.accept()
@@ -102,7 +109,25 @@ if __name__ == "__main__":
     print("Begin Game Here")
     print(player1.ships)
     print(player2.ships)
-    input()
-     
-
+    
+    isPlayer1 = True
+    while (player1.is_alive() and player2.is_alive()):
+        #get current player
+        currentPlayer = player1 if isPlayer1 else player2
+        altPlayer = player2 if isPlayer1 else player1
+        #request action from client, then send board data
+        print('requesting action from %s' % {True:'Player 1', False:'Player 2'}[isPlayer1])
+        currentPlayer.send_message('A')
+        currentPlayer.send_message(flatten_board(currentPlayer.shots_made)+flatten_board(currentPlayer.ships))
+        #get coordinates
+        print('waiting for response...')
+        attack_coord = currentPlayer.sock.recv(2).decode(FORMAT)
+        #update boards
+        print('response recieved, updating boards')
+        currentPlayer.attack(altPlayer,int(attack_coord[0]),int(attack_coord[1]))
+        #get next player
+        isPlayer1 = not isPlayer1
+    #end it all
+    player1.send_message('E')
+    player2.send_message('E')
 
