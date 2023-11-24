@@ -1,8 +1,9 @@
 import socket
+import os
 
 PORT = 5050
 FORMAT = 'utf-8'
-SERVER = '10.2.0.2' #input("Enter server IP: ")
+SERVER = '192.168.56.1' #input("Enter server IP: ")
 ADDR = (SERVER, PORT)
 
 def place_ships():
@@ -26,7 +27,7 @@ def place_ships():
         
         #swapped x and y here because the they were coming out backwards
         valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
-
+        os.system('cls' if os.name == 'nt' else 'clear')
         if valid:
             print("Ship %s placed successfully" % str(a + 1))
             #print board after each placement
@@ -36,35 +37,35 @@ def place_ships():
     return board
      
 #TEMPORARY METHOD, DELETE
-def bozo_ships():
-    board = []
-    for x in range(10):
-        board.append(['.', '.', '.', '.', '.', '.', '.', '.', '.', '.'])
-    size = [5,4,3,3,2] 
+# def bozo_ships():
+#     board = []
+#     for x in range(10):
+#         board.append(['.', '.', '.', '.', '.', '.', '.', '.', '.', '.'])
+#     size = [5,4,3,3,2] 
 
-    a = 0
-    for a in range(5): 
-        print()
-        print_board(board)
-        print("\nShip %s is size %s" % (str(a + 1), size[a]))
-        try:
-            x = a
-            y = 0
-            direction = 's'
-        except Exception as e:
-            print("Invalid input")
-            continue
+#     a = 0
+#     for a in range(5): 
+#         print()
+#         print_board(board)
+#         print("\nShip %s is size %s" % (str(a + 1), size[a]))
+#         try:
+#             x = a
+#             y = 0
+#             direction = 's'
+#         except Exception as e:
+#             print("Invalid input")
+#             continue
         
-        #swapped x and y here because the they were coming out backwards
-        valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
+#         #swapped x and y here because the they were coming out backwards
+#         valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
 
-        if valid:
-            print("Ship %s placed successfully" % str(a + 1))
-            #print board after each placement
-            a += 1
-        else:
-            print("Ship %s could not be placed. Please try a different location and/or orientation" % str(a + 1))
-    return board
+#         if valid:
+#             print("Ship %s placed successfully" % str(a + 1))
+#             #print board after each placement
+#             a += 1
+#         else:
+#             print("Ship %s could not be placed. Please try a different location and/or orientation" % str(a + 1))
+#     return board
      
 #helper to print board
 def print_board(board):
@@ -145,12 +146,12 @@ def get_attack_vector(shotstring):
             int(input("Enter the y coordinate of the strike (0 - 9): ")))
         try:
             shotstat = shotstring[10*coord[1]+coord[0]]
-            if (shotstat == 'O'): break
+            if (shotstat == '.'): break
             print('That coordinate has already been struck!')
         except Exception as e:
             print("Invalid input")
             continue
-    return str(coord[0])+str(coord[1])
+    return str(coord[1])+str(coord[0])
     
 
 if __name__ == "__main__":
@@ -164,10 +165,9 @@ if __name__ == "__main__":
     print('Verifying battleship server existence...')
     if (get_message(client,5) == 'bship'): 
         print('Connected successfully!')
+
         #get board
-        #board = place_ships()
-        #CHANGE THIS CHUMP
-        board = bozo_ships()
+        board = place_ships()
 
         #send board
         client.sendall(flatten_board(board).encode(FORMAT))
@@ -177,6 +177,7 @@ if __name__ == "__main__":
         while (True):
             #await server response for next action
             action = get_message(client,1)
+            os.system('cls' if os.name == 'nt' else 'clear')
             #end of game, quit
             if (action == 'E'): break
             #action requested
@@ -190,9 +191,14 @@ if __name__ == "__main__":
                 print_board(unflatten_board(board_data[100:200]))
                 #send coordinates to server
                 grum = get_attack_vector(board_data[0:100])
-                print(grum)
+                #print(grum)
                 client.sendall(grum.encode(FORMAT))
-                print('response sent')
-                
+                print(client.recv(32).decode(FORMAT))
+
+        print("Game Over!")
+        print(client.recv(32).decode(FORMAT))
+        input("Press enter to exit.")
+
+
     else: 
         print('server responded but not with expect response, terminating program :(')

@@ -18,7 +18,7 @@ class Player:
         self.ships = []
         self.shots_made = []
         for i in range(10):
-            self.shots_made.append(['O','O','O','O','O','O','O','O','O','O'])
+            self.shots_made.append(['.','.','.','.','.','.','.','.','.','.'])
 
     #initilaizes ships and sets status to ready
     def ready_up(self, ships):
@@ -29,10 +29,11 @@ class Player:
     def attack(self, opp, x, y):
         if (opp.ships[y][x] in ['A', 'B', 'C', 'D', 'E']):
             self.shots_made[y][x] = 'H' #mark as hit for player
-            opp.ships[y][x] = 'X' #mark hit on opponents ship
             opp.ship_health[opp.ships[y][x]] -= 1 #update ships health
             if (opp.ship_health[opp.ships[y][x]] == 0):
+                opp.ships[y][x] = 'X' #mark hit on opponents ship
                 return 2
+            opp.ships[y][x] = 'X' #mark hit on opponents ship
             return 1
         else:
             self.shots_made[y][x] = 'M' #mark as hit for player
@@ -47,7 +48,7 @@ class Player:
 
     #sends a string to client
     def send_message(self,message):
-        sock.send(message.encode(FORMAT))
+        self.sock.send(message.encode(FORMAT))
 
 
 
@@ -68,7 +69,7 @@ def flatten_board(board):
 
 #called after new connection, returns player object with ships configured
 def handle_initial_connection(player: Player):
-    player.send_message("bship");
+    player.send_message("bship")
     #wait to receive ship placement from client
     ships = player.sock.recv(256).decode(FORMAT)
     #set players status to ready and initalize those ships
@@ -86,17 +87,17 @@ if __name__ == "__main__":
     print("Waiting for clients to connect...")
 
     #wait for player 1 to join
-    sock, addr = server.accept()
-    player1 = Player(sock, addr) 
-    print("Player 1 Connected [%s]" % addr[0])
+    sock1, addr1 = server.accept()
+    player1 = Player(sock1, addr1) 
+    print("Player 1 Connected [%s]" % addr1[0])
     #begin ship placement for player 1
     thread1 = threading.Thread(target=handle_initial_connection, args=(player1,))
     thread1.start()
 
     #wait for player 2 to join
-    sock, addr = server.accept()
-    player2 = Player(sock, addr) 
-    print("Player 2 Connected [%s]" % addr[0])
+    sock2, addr2 = server.accept()
+    player2 = Player(sock2, addr2) 
+    print("Player 2 Connected [%s]" % addr2[0])
     #begin ship placement for player 1
     thread2 = threading.Thread(target=handle_initial_connection, args=(player2,))
     thread2.start()
@@ -107,8 +108,8 @@ if __name__ == "__main__":
 
     #ACTUAL GAME LOGIC BEGINS HERE
     print("Begin Game Here")
-    print(player1.ships)
-    print(player2.ships)
+    #print(player1.ships)
+    #print(player2.ships)
     
     isPlayer1 = True
     while (player1.is_alive() and player2.is_alive()):
@@ -124,10 +125,24 @@ if __name__ == "__main__":
         attack_coord = currentPlayer.sock.recv(2).decode(FORMAT)
         #update boards
         print('response recieved, updating boards')
-        currentPlayer.attack(altPlayer,int(attack_coord[0]),int(attack_coord[1]))
+        status = currentPlayer.attack(altPlayer,int(attack_coord[0]),int(attack_coord[1]))
+        if (status == 0):
+            currentPlayer.send_message("Miss!")
+        if (status == 1):
+            currentPlayer.send_message("Hit!")
+        if (status == 2):
+            currentPlayer.send_message("Hit! You sunk a ship!")
         #get next player
         isPlayer1 = not isPlayer1
+
     #end it all
     player1.send_message('E')
     player2.send_message('E')
+
+    if (player1.is_alive()):
+        player1.send_message("You win!")
+        player2.send_message("You lose!")
+    else:
+        player1.send_message("You lose!")
+        player2.send_message("You win!")
 
