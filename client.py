@@ -3,7 +3,7 @@ import os
 
 PORT = 5050
 FORMAT = 'utf-8'
-SERVER = '192.168.56.1' #input("Enter server IP: ")
+SERVER = input("Enter server IP: ")
 ADDR = (SERVER, PORT)
 
 def place_ships():
@@ -141,17 +141,24 @@ def get_message(client, numBytes):
 def get_attack_vector(shotstring):
     coord = None
     while (True):
-        coord = (
-            int(input("Enter the x coordinate of the strike (0 - 9): ")),
-            int(input("Enter the y coordinate of the strike (0 - 9): ")))
         try:
+            coord = (
+                int(input("Enter the x coordinate of the strike (0 - 9): ")),
+                int(input("Enter the y coordinate of the strike (0 - 9): ")))
+            #out of bounds
+            if (coord[0] < 0 or coord[0] > 9 or coord[1] < 0 or coord[1] > 9):
+                print("That coordinate is out of bounds!")
+                continue
+            #already shot
             shotstat = shotstring[10*coord[1]+coord[0]]
-            if (shotstat == '.'): break
-            print('That coordinate has already been struck!')
+            if (shotstat != '.'): 
+                print('That coordinate has already been struck!')
+                continue
+            return str(coord[1])+str(coord[0])
         except Exception as e:
             print("Invalid input")
             continue
-    return str(coord[1])+str(coord[0])
+
     
 
 if __name__ == "__main__":
