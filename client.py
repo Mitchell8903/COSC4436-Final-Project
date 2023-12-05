@@ -55,7 +55,9 @@ def bozo_ships():
          except Exception as e:
              print("Invalid input")
              continue
-        
+         if (is_oob(x,y)):
+            print("Coords out of bounds")
+            continue
          #swapped x and y here because the they were coming out backwards
          valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
 
@@ -66,7 +68,10 @@ def bozo_ships():
          else:
              print("Ship %s could not be placed. Please try a different location and/or orientation" % str(a + 1))
      return board
-     
+
+def is_oob(x,y):
+    return x < 0 or x > 9 or y < 0 or y > 9
+
 #helper to print board
 def print_board(board):
     print("  0 1 2 3 4 5 6 7 8 9")
@@ -146,7 +151,7 @@ def get_attack_vector(shotstring):
                 int(input("Enter the x coordinate of the strike (0 - 9): ")),
                 int(input("Enter the y coordinate of the strike (0 - 9): ")))
             #out of bounds
-            if (coord[0] < 0 or coord[0] > 9 or coord[1] < 0 or coord[1] > 9):
+            if (is_oob(coord[0],coord[1])):
                 print("That coordinate is out of bounds!")
                 continue
             #already shot
@@ -174,7 +179,7 @@ if __name__ == "__main__":
         print('Connected successfully!')
 
         #get board
-        board = bozo_ships()
+        board = place_ships()
 
         #send board
         client.sendall(flatten_board(board).encode(FORMAT))
