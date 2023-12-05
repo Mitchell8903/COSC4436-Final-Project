@@ -37,35 +37,35 @@ def place_ships():
     return board
      
 #TEMPORARY METHOD, DELETE
-# def bozo_ships():
-#     board = []
-#     for x in range(10):
-#         board.append(['.', '.', '.', '.', '.', '.', '.', '.', '.', '.'])
-#     size = [5,4,3,3,2] 
+def bozo_ships():
+     board = []
+     for x in range(10):
+         board.append(['.', '.', '.', '.', '.', '.', '.', '.', '.', '.'])
+     size = [5,4,3,3,2] 
 
-#     a = 0
-#     for a in range(5): 
-#         print()
-#         print_board(board)
-#         print("\nShip %s is size %s" % (str(a + 1), size[a]))
-#         try:
-#             x = a
-#             y = 0
-#             direction = 's'
-#         except Exception as e:
-#             print("Invalid input")
-#             continue
+     a = 0
+     for a in range(5): 
+         print()
+         print_board(board)
+         print("\nShip %s is size %s" % (str(a + 1), size[a]))
+         try:
+             x = a
+             y = 0
+             direction = 's'
+         except Exception as e:
+             print("Invalid input")
+             continue
         
-#         #swapped x and y here because the they were coming out backwards
-#         valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
+         #swapped x and y here because the they were coming out backwards
+         valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
 
-#         if valid:
-#             print("Ship %s placed successfully" % str(a + 1))
-#             #print board after each placement
-#             a += 1
-#         else:
-#             print("Ship %s could not be placed. Please try a different location and/or orientation" % str(a + 1))
-#     return board
+         if valid:
+             print("Ship %s placed successfully" % str(a + 1))
+             #print board after each placement
+             a += 1
+         else:
+             print("Ship %s could not be placed. Please try a different location and/or orientation" % str(a + 1))
+     return board
      
 #helper to print board
 def print_board(board):
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         print('Connected successfully!')
 
         #get board
-        board = place_ships()
+        board = bozo_ships()
 
         #send board
         client.sendall(flatten_board(board).encode(FORMAT))
