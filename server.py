@@ -37,6 +37,7 @@ class Player:
             return 1
         else:
             self.shots_made[y][x] = 'M' #mark as hit for player
+            opp.ships[y][x] = 'M'
             return 0
 
     #returns true if still has ships alive
