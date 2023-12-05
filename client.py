@@ -24,7 +24,9 @@ def place_ships():
         except Exception as e:
             print("Invalid input")
             continue
-        
+        if (is_oob(x,y)):
+            print("Coords out of bounds")
+            continue
         #swapped x and y here because the they were coming out backwards
         valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -55,9 +57,6 @@ def bozo_ships():
          except Exception as e:
              print("Invalid input")
              continue
-         if (is_oob(x,y)):
-            print("Coords out of bounds")
-            continue
          #swapped x and y here because the they were coming out backwards
          valid = check_place(board, size[a], direction, y, x, a) #pass size of ship, direction from start, x, y
 
